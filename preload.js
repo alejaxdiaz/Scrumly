@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('winAPI', {
   close:         ()         => ipcRenderer.send('win-close'),
   isMaximized:   ()         => ipcRenderer.invoke('win-is-maximized'),
   onMaximized:   (callback) => ipcRenderer.on('win-maximized', (_, val) => callback(val)),
+  openURL:       (url)      => ipcRenderer.send('shell-open-url', url),
 });
