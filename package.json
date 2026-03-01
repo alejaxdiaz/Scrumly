@@ -1,0 +1,29 @@
+{
+  "name": "scrumly",
+  "version": "1.0.0",
+  "description": "Personal Agile Scrum Board",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.scrumly.board",
+    "productName": "Scrumly",
+    "copyright": "Personal use",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false
+    },
+    "files": ["**/*", "!node_modules/.cache"]
+  }
+}
