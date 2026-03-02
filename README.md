@@ -24,6 +24,19 @@ Windows x64 — one-click NSIS installer, no admin rights required. Your board d
 - **Persistent state** — everything saved to `localStorage` on every mutation; survives restarts
 - **Custom title bar** — native minimize / maximize / close with Windows 11 close-button behavior
 - **Dark theme** — warm-black palette (`#111110`) with a blue accent (`#5470F5`)
+- **Quick Add popup** — global shortcut opens a floating card-creation window from any app, on any screen
+
+---
+
+## Quick Add
+
+Press **`Ctrl + Numpad 0`** from anywhere — even while Discord, a browser, or any other app is in focus — to open the Quick Add popup.
+
+The popup lets you pick a board and column, then fill in all card fields (title, description, priority, tags, links) without switching away from what you're doing. The card is added to Scrumly immediately on save.
+
+The popup stays open when you click away (so you can grab a Discord link or look something up), and only closes when you explicitly save or dismiss it.
+
+**Changing the shortcut:** click the **Quick Add** button at the bottom of the sidebar → **Rebind** → press any key combination. The new shortcut is saved to `%AppData%\Scrumly\scrumly-settings.json` and persists across restarts.
 
 ---
 
@@ -46,7 +59,7 @@ npm start
 npm run build
 ```
 
-The app runs directly from source — `index.html` is served as-is by Electron. The installer is produced by electron-builder and requires `assets/icon.ico` to be present.
+The app runs directly from source — `index.html` is served as-is by Electron. The installer is produced by electron-builder and requires `assets/scrumly_icon.ico` to be present.
 
 ---
 
@@ -58,7 +71,7 @@ The app runs directly from source — `index.html` is served as-is by Electron. 
 | Renderer | Vanilla HTML + CSS + JS (no framework) |
 | Fonts | Bricolage Grotesque · DM Sans via Google Fonts |
 | Packaging | electron-builder 24 · Windows x64 NSIS installer |
-| Persistence | `localStorage` (`scrumly_v2` key) |
+| Persistence | `localStorage` (`scrumly_v2` key) · `%AppData%\Scrumly\scrumly-settings.json` |
 
 ---
 
@@ -66,12 +79,14 @@ The app runs directly from source — `index.html` is served as-is by Electron. 
 
 ```
 scrumly/
-├── main.js        — Electron main process
-├── preload.js     — Context bridge (window.winAPI)
-├── index.html     — Entire renderer: CSS + HTML + JavaScript
+├── main.js              — Electron main process, global shortcut, quick-add window
+├── preload.js           — Context bridge (window.winAPI) for the main window
+├── preload-quick-add.js — Context bridge (window.quickAddAPI) for the popup
+├── index.html           — Entire renderer: CSS + HTML + JavaScript
+├── quick-add.html       — Quick Add popup: board/column select + card form
 ├── package.json
 └── assets/
-    └── icon.ico   — App icon (required for builds)
+    └── scrumly_icon.ico — App icon (required for builds)
 ```
 
 ---
@@ -81,8 +96,28 @@ scrumly/
 ### Main Process (`main.js`)
 
 - Creates a frameless `BrowserWindow` (min 900×600, default up to 1360×860)
-- Handles IPC for window controls: `win-minimize`, `win-maximize`, `win-close`, `win-is-maximized`
+- Creates a hidden quick-add `BrowserWindow` at startup (pre-loaded so the first shortcut press is instant)
+- Registers a global keyboard shortcut (`Control+num0` by default) via Electron's `globalShortcut`
+- Reads live board state from the main window via `webContents.executeJavaScript` and forwards it to the popup on each open
+- Receives new cards from the popup and forwards them to the main window via IPC
+- Persists the configured shortcut to `%AppData%\Scrumly\scrumly-settings.json`
 - Handles `shell-open-url` IPC: converts `https://` URLs to native protocol URLs when the app is installed, falls back to the browser
+
+**IPC channels:**
+
+| Channel | Direction | Description |
+|---|---|---|
+| `win-minimize/maximize/close` | renderer → main | Window controls |
+| `win-is-maximized` | renderer ↔ main | Maximize state query |
+| `win-maximized` | main → renderer | Maximize state push |
+| `shell-open-url` | renderer → main | Open URL in app or browser |
+| `quick-add-card` | popup → main → renderer | Add card from popup |
+| `quick-add-close` | popup → main | Hide popup |
+| `get-quick-add-shortcut` | renderer ↔ main | Read current shortcut |
+| `set-quick-add-shortcut` | renderer → main | Register new shortcut |
+| `add-card-from-popup` | main → renderer | Deliver card to main window |
+| `boards-data` | main → popup | Fresh state on each open |
+| `shortcut` | main → popup | Current shortcut label |
 
 **Native protocol mapping:**
 
@@ -97,15 +132,29 @@ scrumly/
 
 ### Preload (`preload.js`)
 
-Exposes `window.winAPI` to the renderer via `contextBridge`:
+Exposes `window.winAPI` to the main renderer via `contextBridge`:
 
 ```js
 window.winAPI.minimize()
-window.winAPI.maximize()        // toggles maximize/restore
+window.winAPI.maximize()          // toggles maximize/restore
 window.winAPI.close()
-window.winAPI.isMaximized()     // → Promise<boolean>
-window.winAPI.onMaximized(cb)   // subscribe to maximize state changes
-window.winAPI.openURL(url)      // open a URL (app or browser)
+window.winAPI.isMaximized()       // → Promise<boolean>
+window.winAPI.onMaximized(cb)     // subscribe to maximize state changes
+window.winAPI.openURL(url)        // open a URL (app or browser)
+window.winAPI.onAddCard(cb)       // receive cards from the quick-add popup
+window.winAPI.getShortcut()       // → Promise<string> current accelerator
+window.winAPI.setShortcut(acc)    // → Promise<boolean> register new shortcut
+```
+
+### Quick-Add Preload (`preload-quick-add.js`)
+
+Exposes `window.quickAddAPI` to the popup renderer:
+
+```js
+window.quickAddAPI.close()           // hide the popup
+window.quickAddAPI.saveCard(data)    // send card to main process
+window.quickAddAPI.onBoardsData(cb)  // receive boards state on each open
+window.quickAddAPI.onShortcut(cb)    // receive shortcut label updates
 ```
 
 ### Renderer (`index.html`)
@@ -128,7 +177,7 @@ S = {
 }
 ```
 
-Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launch a sample "Website Redesign" demo board is loaded.
+Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launch a set of demo boards is loaded.
 
 **Render cycle:** every mutation calls `render()` → `renderSidebar()` + `renderMain()` + `save()`. Full DOM re-render, no virtual DOM.
 
@@ -138,17 +187,21 @@ Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launc
 
 | Key | Context | Action |
 |---|---|---|
+| `Ctrl + Numpad 0` | Global (any app) | Open Quick Add popup |
 | `Enter` | Card title field | Save card |
 | `Enter` | Link URL field | Add link |
 | `Enter` | Name modal input | Confirm |
 | `Escape` | Card modal | Close without saving |
 | `Escape` | Name modal | Cancel |
+| `Escape` | Quick Add popup | Close popup |
+
+The global shortcut is configurable — click **Quick Add** in the sidebar and press **Rebind**.
 
 ---
 
 ## Design Tokens
 
-All colors, radii, and shadows are CSS custom properties on `:root` in `index.html`:
+All colors, radii, and shadows are CSS custom properties on `:root` in `index.html` (and mirrored in `quick-add.html`):
 
 | Token | Value | Role |
 |---|---|---|
@@ -165,6 +218,7 @@ All colors, radii, and shadows are CSS custom properties on `:root` in `index.ht
 
 ## Data & Privacy
 
-- Storage key: `localStorage.scrumly_v2`
-- All data stays on your machine — no accounts, no sync, no telemetry
-- No migrations exist. If the schema changes in a future version, clearing `scrumly_v2` from DevTools resets to the demo board
+- Board data: `localStorage.scrumly_v2` (stays on your machine)
+- Settings: `%AppData%\Scrumly\scrumly-settings.json` (shortcut preference)
+- No accounts, no sync, no telemetry
+- No migrations exist. If the schema changes in a future version, clearing `scrumly_v2` from DevTools resets to the demo boards

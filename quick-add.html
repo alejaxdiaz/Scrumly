@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quick Add</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #111110;
+      --surface:      #1A1A18;
+      --card-bg:      #1E1E1C;
+      --col-bg:       #191917;
+      --border:       #2C2C29;
+      --border-light: #252523;
+
+      --text:         #EEECEA;
+      --text-2:       #7A7875;
+      --text-muted:   #5C5B58;
+
+      --accent:       #5470F5;
+      --accent-2:     #3D5AF1;
+      --accent-bg:    #171D3A;
+
+      --p-low:        #22C55E;
+      --p-med:        #F59E0B;
+      --p-high:       #EF4444;
+
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 14px;
+
+      --sh-lg: 0 12px 40px rgba(0,0,0,.7), 0 4px 16px rgba(0,0,0,.4);
+
+      --ui:   'Bricolage Grotesque', sans-serif;
+      --body: 'DM Sans', sans-serif;
+    }
+
+    html, body {
+      height: 100%; overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 13px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Title bar ─────────────────────────────────────── */
+    .qa-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px 0 14px;
+      height: 42px;
+      min-height: 42px;
+      background: #0D0D0C;
+      border-bottom: 1px solid var(--border);
+      -webkit-app-region: drag;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .qa-logo {
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qa-logo svg { width: 10px; height: 10px; fill: #fff; }
+
+    .qa-title {
+      font-family: var(--ui);
+      font-size: 13px; font-weight: 700;
+      letter-spacing: -.2px;
+      flex: 1;
+    }
+
+    .qa-shortcut {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: var(--ui);
+      background: var(--col-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      letter-spacing: .2px;
+      -webkit-app-region: no-drag;
+    }
+
+    .qa-close {
+      width: 26px; height: 26px;
+      border: none; background: none;
+      border-radius: 5px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-2);
+      transition: background .12s, color .12s;
+      -webkit-app-region: no-drag;
+      flex-shrink: 0;
+    }
+
+    .qa-close:hover { background: #E81123; color: #fff; }
+    .qa-close svg { width: 9px; height: 9px; pointer-events: none; }
+
+    /* ── Form body ─────────────────────────────────────── */
+    .qa-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 14px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .qa-body::-webkit-scrollbar { width: 4px; }
+    .qa-body::-webkit-scrollbar-thumb { background: #3A3A37; border-radius: 2px; }
+
+    .f-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .f-row { display: flex; gap: 10px; }
+    .f-row .f-group { flex: 1; }
+
+    .f-label {
+      font-family: var(--ui);
+      font-size: 9.5px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .7px;
+      color: var(--text-muted);
+    }
+
+    .f-input, .f-textarea, .f-select {
+      background: var(--col-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 7px 9px;
+      font-size: 12.5px;
+      font-family: var(--body);
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      transition: border-color .13s, background .13s;
+    }
+
+    .f-input:focus, .f-textarea:focus, .f-select:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .f-input.err { border-color: var(--p-high); }
+
+    .f-textarea { resize: vertical; min-height: 60px; }
+
+    .f-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%235C5B58' stroke-width='1.3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
+      padding-right: 28px;
+    }
+
+    .f-select option {
+      background: #1E1E1C;
+      color: var(--text);
+    }
+
+    .f-select:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* Priority */
+    .priority-row { display: flex; gap: 6px; }
+    .p-opt { flex: 1; position: relative; }
+    .p-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .p-lbl {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 6px 4px; border: 1px solid var(--border);
+      border-radius: var(--r-sm); cursor: pointer;
+      font-size: 11px; font-family: var(--ui); font-weight: 500;
+      color: var(--text-2); background: var(--col-bg);
+      transition: all .13s; user-select: none;
+    }
+    .p-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .p-opt.low  input:checked + .p-lbl { color: #4ade80; background: rgba(34,197,94,.1);  border-color: var(--p-low); }
+    .p-opt.med  input:checked + .p-lbl { color: #fbbf24; background: rgba(245,158,11,.1); border-color: var(--p-med); }
+    .p-opt.high input:checked + .p-lbl { color: #f87171; background: rgba(239,68,68,.1);  border-color: var(--p-high); }
+
+    /* Links */
+    .link-add-row { display: flex; gap: 6px; }
+    .link-add-row .f-input { flex: 1; min-width: 0; }
+    .link-add-btn {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      background: var(--col-bg); color: var(--text-2);
+      border-radius: var(--r-sm);
+      font-family: var(--ui); font-size: 11.5px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: all .13s;
+    }
+    .link-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+    .links-list { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+
+    .link-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 7px;
+      background: var(--col-bg); border: 1px solid var(--border);
+      border-radius: var(--r-sm); overflow: hidden;
+      font-size: 11px;
+    }
+
+    .link-item-label { font-family: var(--ui); font-size: 10.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+    .link-item-url   { font-size: 10px; color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .link-item-del   {
+      width: 16px; height: 16px; border: none; background: none;
+      border-radius: 3px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); flex-shrink: 0;
+      transition: background .12s, color .12s;
+    }
+    .link-item-del:hover { background: rgba(239,68,68,.15); color: #ef4444; }
+    .link-item-del svg { width: 7px; height: 7px; }
+
+    /* No boards message */
+    .no-boards {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; text-align: center; padding: 24px;
+      color: var(--text-muted);
+    }
+
+    .no-boards-title { font-family: var(--ui); font-size: 14px; font-weight: 600; color: var(--text-2); }
+
+    /* ── Footer ────────────────────────────────────────── */
+    .qa-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-light, #252523);
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 7px 14px;
+      border-radius: var(--r-sm);
+      font-size: 12.5px; font-family: var(--ui); font-weight: 600;
+      cursor: pointer; border: none; transition: all .13s;
+    }
+
+    .btn-ghost {
+      background: var(--col-bg); color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); color: var(--text); }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-2); transform: translateY(-1px); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #3A3A37; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="qa-header">
+  <div class="qa-logo">
+    <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+  </div>
+  <span class="qa-title">Quick Add</span>
+  <span class="qa-shortcut" id="shortcut-label">Ctrl + Numpad 0</span>
+  <button class="qa-close" id="btn-close" title="Close (Esc)">
+    <svg viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<!-- Body: shown when boards exist -->
+<div class="qa-body" id="qa-body" style="display:none">
+
+  <div class="f-row">
+    <div class="f-group">
+      <label class="f-label" for="qa-board">Board</label>
+      <select class="f-select" id="qa-board"></select>
+    </div>
+    <div class="f-group">
+      <label class="f-label" for="qa-col">Column</label>
+      <select class="f-select" id="qa-col"></select>
+    </div>
+  </div>
+
+  <div class="f-group">
+    <label class="f-label" for="qa-title">Title</label>
+    <input class="f-input" id="qa-title" type="text" placeholder="What needs to be done?">
+  </div>
+
+  <div class="f-group">
+    <label class="f-label" for="qa-desc">Description</label>
+    <textarea class="f-textarea" id="qa-desc" placeholder="Add notes, details, or context…"></textarea>
+  </div>
+
+  <div class="f-group">
+    <span class="f-label">Priority</span>
+    <div class="priority-row">
+      <div class="p-opt low">
+        <input type="radio" name="qa-p" id="qa-p-low" value="low">
+        <label class="p-lbl" for="qa-p-low"><span class="p-dot" style="background:var(--p-low)"></span>Low</label>
+      </div>
+      <div class="p-opt med">
+        <input type="radio" name="qa-p" id="qa-p-med" value="medium" checked>
+        <label class="p-lbl" for="qa-p-med"><span class="p-dot" style="background:var(--p-med)"></span>Medium</label>
+      </div>
+      <div class="p-opt high">
+        <input type="radio" name="qa-p" id="qa-p-high" value="high">
+        <label class="p-lbl" for="qa-p-high"><span class="p-dot" style="background:var(--p-high)"></span>High</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="f-group">
+    <label class="f-label" for="qa-tags">Tags</label>
+    <input class="f-input" id="qa-tags" type="text" placeholder="design, backend, ux  (comma-separated)">
+  </div>
+
+  <div class="f-group">
+    <span class="f-label">Links</span>
+    <div class="link-add-row">
+      <input class="f-input" id="qa-link-url" type="text" placeholder="Paste a URL — Discord, GitHub, Figma…">
+      <button class="link-add-btn" id="qa-link-add-btn" type="button">Add</button>
+    </div>
+    <div class="links-list" id="qa-links-list"></div>
+  </div>
+
+</div>
+
+<!-- No boards state -->
+<div class="no-boards" id="qa-no-boards" style="display:none">
+  <div class="no-boards-title">No boards yet</div>
+  <div style="font-size:11.5px">Open Scrumly and create a board first.</div>
+</div>
+
+<!-- Footer -->
+<div class="qa-footer" id="qa-footer" style="display:none">
+  <button class="btn btn-ghost" id="qa-cancel">Cancel</button>
+  <button class="btn btn-primary" id="qa-save">Save Card</button>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let state       = null;   // parsed S from main window
+let modalLinks  = [];
+
+// ── Shortcut label ─────────────────────────────────────────
+function displayShortcut(acc) {
+  if (!acc) return '';
+  const numMap = {
+    num0:'Numpad 0', num1:'Numpad 1', num2:'Numpad 2', num3:'Numpad 3',
+    num4:'Numpad 4', num5:'Numpad 5', num6:'Numpad 6', num7:'Numpad 7',
+    num8:'Numpad 8', num9:'Numpad 9', numadd:'Numpad +', numminus:'Numpad −',
+    nummul:'Numpad ×', numdiv:'Numpad /', numdec:'Numpad .',
+  };
+  return acc.split('+').map(k =>
+    numMap[k] || (k === 'Control' ? 'Ctrl' : k)
+  ).join(' + ');
+}
+
+window.quickAddAPI.onShortcut(acc => {
+  document.getElementById('shortcut-label').textContent = displayShortcut(acc);
+});
+
+// ── Boards data ────────────────────────────────────────────
+window.quickAddAPI.onBoardsData(raw => {
+  try { state = JSON.parse(raw); } catch(_) { state = null; }
+  populateUI();
+});
+
+function populateUI() {
+  const body     = document.getElementById('qa-body');
+  const noBoards = document.getElementById('qa-no-boards');
+  const footer   = document.getElementById('qa-footer');
+
+  if (!state || !state.boards || !state.boards.length) {
+    body.style.display     = 'none';
+    noBoards.style.display = 'flex';
+    footer.style.display   = 'none';
+    return;
+  }
+
+  body.style.display     = 'flex';
+  noBoards.style.display = 'none';
+  footer.style.display   = 'flex';
+
+  // Reset form
+  document.getElementById('qa-title').value = '';
+  document.getElementById('qa-desc').value  = '';
+  document.getElementById('qa-tags').value  = '';
+  document.getElementById('qa-p-med').checked = true;
+  document.getElementById('qa-title').classList.remove('err');
+  document.getElementById('qa-link-url').value = '';
+  modalLinks = [];
+  renderLinks();
+
+  // Populate board dropdown
+  const boardSel = document.getElementById('qa-board');
+  const prevBoard = boardSel.value;
+  boardSel.innerHTML = state.boards.map(b =>
+    `<option value="${b.id}">${escHtml(b.name)}</option>`
+  ).join('');
+
+  // Prefer active board
+  const target = state.boards.find(b => b.id === state.activeId) || state.boards[0];
+  boardSel.value = (state.boards.some(b => b.id === prevBoard) && prevBoard)
+    ? prevBoard
+    : target.id;
+
+  populateColumns(boardSel.value);
+
+  setTimeout(() => document.getElementById('qa-title').focus(), 60);
+}
+
+function populateColumns(boardId) {
+  const board  = state?.boards.find(b => b.id === boardId);
+  const colSel = document.getElementById('qa-col');
+  if (!board || !board.columns.length) {
+    colSel.innerHTML = '<option value="">No columns</option>';
+    colSel.disabled  = true;
+    return;
+  }
+  colSel.disabled  = false;
+  colSel.innerHTML = board.columns.map(c =>
+    `<option value="${c.id}">${escHtml(c.name)}</option>`
+  ).join('');
+}
+
+document.getElementById('qa-board').addEventListener('change', e => {
+  populateColumns(e.target.value);
+});
+
+// ── Links ──────────────────────────────────────────────────
+function linkLabel(url) {
+  try {
+    const h = new URL(url.startsWith('http') ? url : 'https://' + url).hostname.replace('www.','');
+    if (h.includes('discord')) return 'Discord';
+    if (h.includes('github'))  return 'GitHub';
+    if (h.includes('figma'))   return 'Figma';
+    if (h.includes('notion'))  return 'Notion';
+    if (h.includes('linear'))  return 'Linear';
+    if (h.includes('slack'))   return 'Slack';
+    if (h.includes('youtube') || h.includes('youtu.be')) return 'YouTube';
+    return h;
+  } catch(_) { return url.slice(0, 22); }
+}
+
+function renderLinks() {
+  const list = document.getElementById('qa-links-list');
+  if (!modalLinks.length) { list.innerHTML = ''; return; }
+  list.innerHTML = modalLinks.map((l, i) => `
+    <div class="link-item">
+      <span class="link-item-label">${escHtml(l.label)}</span>
+      <span class="link-item-url">${escHtml(l.url)}</span>
+      <button class="link-item-del" onclick="removeLink(${i})">
+        <svg viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addLink() {
+  const input = document.getElementById('qa-link-url');
+  const raw   = input.value.trim();
+  if (!raw) return;
+  const url = raw.startsWith('http') ? raw : 'https://' + raw;
+  if (modalLinks.some(l => l.url === url)) { input.value = ''; return; }
+  modalLinks.push({ url, label: linkLabel(url) });
+  input.value = '';
+  renderLinks();
+}
+
+function removeLink(i) {
+  modalLinks.splice(i, 1);
+  renderLinks();
+}
+
+document.getElementById('qa-link-add-btn').onclick = addLink;
+document.getElementById('qa-link-url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addLink(); }
+});
+
+// ── Save ───────────────────────────────────────────────────
+function saveCard() {
+  const titleEl = document.getElementById('qa-title');
+  const title   = titleEl.value.trim();
+  if (!title) {
+    titleEl.classList.add('err');
+    titleEl.focus();
+    return;
+  }
+  titleEl.classList.remove('err');
+
+  const boardId  = document.getElementById('qa-board').value;
+  const colId    = document.getElementById('qa-col').value;
+  if (!boardId || !colId) return;
+
+  const desc     = document.getElementById('qa-desc').value.trim();
+  const tags     = document.getElementById('qa-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const priority = document.querySelector('input[name="qa-p"]:checked')?.value || 'medium';
+  const links    = modalLinks.slice();
+
+  window.quickAddAPI.saveCard({ boardId, colId, title, desc, priority, tags, links });
+}
+
+// ── Event bindings ─────────────────────────────────────────
+document.getElementById('btn-close').onclick  = () => window.quickAddAPI.close();
+document.getElementById('qa-cancel').onclick  = () => window.quickAddAPI.close();
+document.getElementById('qa-save').onclick    = saveCard;
+
+document.getElementById('qa-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveCard(); }
+  if (e.key === 'Escape') window.quickAddAPI.close();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') window.quickAddAPI.close();
+});
+
+// ── Util ───────────────────────────────────────────────────
+function escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
