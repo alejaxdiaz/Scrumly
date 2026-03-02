@@ -898,28 +898,80 @@ const DEFAULT_COLS = [
 ];
 
 const SAMPLE = {
-  boards: [{
-    id: 'board-demo',
-    name: 'Website Redesign',
-    columns: [
-      { id:'col-1', name:'Backlog',     color:'#94A3B8' },
-      { id:'col-2', name:'To Do',       color:'#60A5FA' },
-      { id:'col-3', name:'In Progress', color:'#FBBF24' },
-      { id:'col-4', name:'In Review',   color:'#A78BFA' },
-      { id:'col-5', name:'Done',        color:'#34D399' },
-    ],
-    cards: [
-      { id:'c1', col:'col-1', title:'Audit current performance',  desc:'Run Lighthouse audits to identify bottlenecks.',            priority:'low',    tags:['audit'] },
-      { id:'c2', col:'col-1', title:'Competitor analysis',        desc:'Review 5 competitor sites for UX patterns.',               priority:'low',    tags:['research'] },
-      { id:'c3', col:'col-2', title:'Define new color system',    desc:'Build accessible palette with primary & semantic tokens.',  priority:'high',   tags:['design','system'] },
-      { id:'c4', col:'col-2', title:'Typography scale',           desc:'Establish font families, sizes, and line heights.',         priority:'medium', tags:['design'] },
-      { id:'c5', col:'col-3', title:'Homepage hero redesign',     desc:'Animated headline, updated CTAs, and hero imagery.',        priority:'high',   tags:['design','frontend'] },
-      { id:'c6', col:'col-3', title:'Responsive navigation',      desc:'Mobile-friendly nav with search and account links.',        priority:'medium', tags:['frontend'] },
-      { id:'c7', col:'col-4', title:'Accessibility review',       desc:'WCAG 2.1 AA compliance for keyboard navigation.',           priority:'high',   tags:['a11y'] },
-      { id:'c8', col:'col-5', title:'Brand guidelines doc',       desc:'Brand voice, logo usage, and visual identity rules.',       priority:'low',    tags:['brand'] },
-    ]
-  }],
-  activeId: 'board-demo'
+  boards: [
+    {
+      id: 'board-1',
+      name: 'Product Launch Q2',
+      columns: [
+        { id:'b1-col-1', name:'Backlog',     color:'#94A3B8' },
+        { id:'b1-col-2', name:'To Do',       color:'#60A5FA' },
+        { id:'b1-col-3', name:'In Progress', color:'#FBBF24' },
+        { id:'b1-col-4', name:'In Review',   color:'#A78BFA' },
+        { id:'b1-col-5', name:'Done',        color:'#34D399' },
+      ],
+      cards: [
+        { id:'b1c1',  col:'b1-col-1', title:'Define go-to-market strategy',      desc:'Identify target segments, positioning, and key messaging for launch.',          priority:'high',   tags:['strategy'] },
+        { id:'b1c2',  col:'b1-col-1', title:'Competitive pricing analysis',       desc:'Research competitor pricing tiers and model our value proposition.',            priority:'medium', tags:['research'] },
+        { id:'b1c3',  col:'b1-col-1', title:'Set up analytics dashboard',         desc:'Configure Mixpanel funnels and revenue tracking for launch metrics.',           priority:'low',    tags:['analytics'] },
+        { id:'b1c4',  col:'b1-col-2', title:'Write launch blog post',             desc:'Draft 1200-word post covering the problem, solution, and customer stories.',    priority:'medium', tags:['content'] },
+        { id:'b1c5',  col:'b1-col-2', title:'Prepare press kit',                  desc:'Logo assets, product screenshots, founder bios, and one-pager.',                priority:'medium', tags:['marketing'] },
+        { id:'b1c6',  col:'b1-col-2', title:'Build email drip campaign',          desc:'5-email onboarding sequence for new sign-ups post-launch.',                     priority:'high',   tags:['email','marketing'] },
+        { id:'b1c7',  col:'b1-col-3', title:'Launch landing page',               desc:'Hero, feature grid, pricing, FAQ, and CTA sections.',                           priority:'high',   tags:['frontend'] },
+        { id:'b1c8',  col:'b1-col-3', title:'Set up payment integration',         desc:'Stripe checkout with annual/monthly toggle and promo code support.',            priority:'high',   tags:['backend'] },
+        { id:'b1c9',  col:'b1-col-4', title:'Beta tester feedback synthesis',     desc:'Aggregate survey results from 40 beta users into actionable insights.',         priority:'medium', tags:['research'] },
+        { id:'b1c10', col:'b1-col-5', title:'Domain & SSL setup',                 desc:'Pointed DNS, provisioned certificate, and verified redirect rules.',            priority:'low',    tags:['infra'] },
+        { id:'b1c11', col:'b1-col-5', title:'Stakeholder sign-off on copy',       desc:'Final approval received from legal and marketing leads.',                       priority:'low',    tags:['copy'] },
+      ]
+    },
+    {
+      id: 'board-2',
+      name: 'Mobile App v2.0',
+      columns: [
+        { id:'b2-col-1', name:'Backlog',     color:'#94A3B8' },
+        { id:'b2-col-2', name:'To Do',       color:'#60A5FA' },
+        { id:'b2-col-3', name:'In Progress', color:'#FBBF24' },
+        { id:'b2-col-4', name:'In Review',   color:'#A78BFA' },
+        { id:'b2-col-5', name:'Done',        color:'#34D399' },
+      ],
+      cards: [
+        { id:'b2c1',  col:'b2-col-1', title:'Offline mode support',               desc:'Cache last 30 days of user data with SQLite for no-network usage.',             priority:'medium', tags:['mobile','storage'] },
+        { id:'b2c2',  col:'b2-col-1', title:'Push notification system',           desc:'Deep-link notifications for reminders, mentions, and weekly summaries.',        priority:'high',   tags:['mobile'] },
+        { id:'b2c3',  col:'b2-col-1', title:'Apple Watch companion app',          desc:'Glanceable widget showing today\'s tasks and a quick-add complication.',        priority:'low',    tags:['watchos'] },
+        { id:'b2c4',  col:'b2-col-2', title:'Redesign onboarding flow',            desc:'3-screen onboarding with contextual tooltips and skip option.',                 priority:'high',   tags:['ux','onboarding'] },
+        { id:'b2c5',  col:'b2-col-2', title:'Dark mode polish pass',               desc:'Audit all screens for color contrast and fix 12 flagged issues.',               priority:'medium', tags:['ui'] },
+        { id:'b2c6',  col:'b2-col-3', title:'Implement biometric auth',            desc:'Face ID / Touch ID login with fallback to PIN.',                                priority:'high',   tags:['security','auth'] },
+        { id:'b2c7',  col:'b2-col-3', title:'Drag-to-reorder tasks',               desc:'Long-press drag with haptic feedback and animated reorder.',                    priority:'medium', tags:['ux','mobile'] },
+        { id:'b2c8',  col:'b2-col-4', title:'Widget for iOS home screen',          desc:'Small/medium widget variants showing active board progress.',                   priority:'medium', tags:['ios','widget'] },
+        { id:'b2c9',  col:'b2-col-4', title:'Performance profiling',               desc:'Reduce cold start time from 1.8s to under 800ms on mid-range devices.',        priority:'high',   tags:['performance'] },
+        { id:'b2c10', col:'b2-col-5', title:'App Store screenshots',               desc:'6 localized screenshot sets created and uploaded.',                             priority:'low',    tags:['marketing'] },
+        { id:'b2c11', col:'b2-col-5', title:'Crash reporting integration',         desc:'Sentry configured with release tracking and source maps.',                      priority:'low',    tags:['monitoring'] },
+      ]
+    },
+    {
+      id: 'board-3',
+      name: 'Design System',
+      columns: [
+        { id:'b3-col-1', name:'Backlog',     color:'#94A3B8' },
+        { id:'b3-col-2', name:'To Do',       color:'#60A5FA' },
+        { id:'b3-col-3', name:'In Progress', color:'#FBBF24' },
+        { id:'b3-col-4', name:'In Review',   color:'#A78BFA' },
+        { id:'b3-col-5', name:'Done',        color:'#34D399' },
+      ],
+      cards: [
+        { id:'b3c1',  col:'b3-col-1', title:'Motion & animation guidelines',       desc:'Define easing curves, durations, and reduced-motion fallbacks.',                priority:'low',    tags:['motion'] },
+        { id:'b3c2',  col:'b3-col-1', title:'Data visualisation components',       desc:'Chart, graph, and sparkline primitives built on top of tokens.',                priority:'medium', tags:['components','charts'] },
+        { id:'b3c3',  col:'b3-col-2', title:'Icon library audit',                  desc:'Standardise icon sizes to 16/20/24px and remove 34 duplicates.',                priority:'medium', tags:['icons'] },
+        { id:'b3c4',  col:'b3-col-2', title:'Spacing & layout tokens',             desc:'4pt grid, named spacing scale, and breakpoint tokens in JSON.',                  priority:'high',   tags:['tokens','system'] },
+        { id:'b3c5',  col:'b3-col-2', title:'Form component library',              desc:'Input, select, checkbox, radio, and toggle with error states.',                  priority:'high',   tags:['components','forms'] },
+        { id:'b3c6',  col:'b3-col-3', title:'Color token documentation',           desc:'Semantic color map covering brand, feedback, surface, and text roles.',          priority:'high',   tags:['tokens','docs'] },
+        { id:'b3c7',  col:'b3-col-3', title:'Typography system',                   desc:'Scale, weight, and line-height tokens for display, body, and mono.',             priority:'medium', tags:['typography','tokens'] },
+        { id:'b3c8',  col:'b3-col-4', title:'Button component variants',           desc:'Primary, secondary, ghost, and destructive states with loading spinner.',        priority:'medium', tags:['components'] },
+        { id:'b3c9',  col:'b3-col-5', title:'Storybook setup',                     desc:'Auto-docs, controls, and a11y addon configured and deployed.',                   priority:'low',    tags:['docs','tooling'] },
+        { id:'b3c10', col:'b3-col-5', title:'Figma variable sync',                 desc:'All tokens exported to Figma variables via Style Dictionary pipeline.',          priority:'low',    tags:['figma','tokens'] },
+      ]
+    }
+  ],
+  activeId: 'board-1'
 };
 
 // ════════════════════════════════════════════════════════════
