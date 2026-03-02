@@ -17,12 +17,13 @@
     "copyright": "Personal use",
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
-      "icon": "assets/icon.ico"
+      "icon": "assets/scrumly_icon.ico"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": "always"
     },
     "files": ["**/*", "!node_modules/.cache"]
   }

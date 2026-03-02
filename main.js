@@ -14,7 +14,7 @@ function createWindow() {
     frame:     false,           // custom title bar
     transparent: false,
     backgroundColor: '#111110',
-    icon:      path.join(__dirname, 'assets', 'icon.ico'),
+    icon:      path.join(__dirname, 'assets', 'scrumly_icon.ico'),
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
