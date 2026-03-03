@@ -342,6 +342,12 @@
     }
 
     .col-name-input:focus { color: var(--text); }
+    .col-name-input:hover:not(:focus) {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--text-muted);
+    }
 
     .col-count {
       font-size: 10.5px; font-weight: 500;
@@ -361,6 +367,18 @@
     .column:hover .col-del-btn { opacity: 1; }
     .col-del-btn:hover { background: rgba(239,68,68,.15); color: #EF4444; }
     .col-del-btn svg { width: 11px; height: 11px; }
+
+    .col-sort-btn {
+      width: 22px; height: 22px;
+      border: none; background: none; border-radius: 4px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); opacity: 0;
+      transition: opacity .14s, background .14s, color .14s;
+      flex-shrink: 0;
+    }
+    .column:hover .col-sort-btn { opacity: 1; }
+    .col-sort-btn:hover { background: rgba(84,112,245,.12); color: var(--accent); }
+    .col-sort-btn svg { width: 11px; height: 11px; }
 
     /* ══ CARDS LIST ══════════════════════════════════════════ */
     .cards-list {
@@ -405,6 +423,8 @@
       transform: rotate(1.5deg) scale(1.03);
       box-shadow: var(--sh-lg), 0 0 0 2px var(--accent);
     }
+    .card.drag-target-above { box-shadow: 0 -2px 0 0 var(--accent); }
+    .card.drag-target-below { box-shadow: 0 2px 0 0 var(--accent); }
 
     .card-title {
       font-family: var(--ui);
@@ -1316,7 +1336,25 @@ function renderMain() {
 }
 
 function renderColumn(board, col) {
-  const cards = board.cards.filter(c => c.col === col.id);
+  const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+  let cards = board.cards.filter(c => c.col === col.id);
+
+  if (col.sortMode !== 'custom') {
+    cards = cards.slice().sort((a, b) =>
+      (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1)
+    );
+  }
+
+  const sortBtn = col.sortMode === 'custom'
+    ? `<button class="col-sort-btn"
+               title="Sort by priority"
+               onclick="sortColByPriority('${board.id}','${col.id}')">
+         <svg viewBox="0 0 12 12" fill="none">
+           <path d="M1 3h10M3 6h6M5 9h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+         </svg>
+       </button>`
+    : '';
+
   return `
     <div class="column"
          data-col="${col.id}" data-bid="${board.id}"
@@ -1329,6 +1367,7 @@ function renderColumn(board, col) {
                onblur="saveColName(this)"
                onkeydown="if(event.key==='Enter')this.blur()">
         <span class="col-count">${cards.length}</span>
+        ${sortBtn}
         <button class="col-del-btn" onclick="deleteColumn('${board.id}','${col.id}')">
           <svg viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
@@ -1529,9 +1568,33 @@ function onDragStart(e, cardId) {
 function onDragEnd(e) {
   e.target.classList.remove('dragging');
   document.querySelectorAll('.column.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.card.drag-target-above, .card.drag-target-below')
+    .forEach(el => el.classList.remove('drag-target-above', 'drag-target-below'));
 }
 
-function onDragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  document.querySelectorAll('.card.drag-target-above, .card.drag-target-below')
+    .forEach(el => el.classList.remove('drag-target-above', 'drag-target-below'));
+
+  const cardEls = Array.from(e.currentTarget.querySelectorAll('.cards-list .card'));
+  let matched = false;
+  for (const cardEl of cardEls) {
+    if (cardEl.dataset.cid === drag.cardId) continue;
+    const rect = cardEl.getBoundingClientRect();
+    if (e.clientY < rect.top + rect.height / 2) {
+      cardEl.classList.add('drag-target-above');
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) {
+    const last = cardEls.filter(el => el.dataset.cid !== drag.cardId).at(-1);
+    if (last) last.classList.add('drag-target-below');
+  }
+}
 function onDragEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 
 function onDragLeave(e) {
@@ -1541,15 +1604,78 @@ function onDragLeave(e) {
 
 function onDrop(e) {
   e.preventDefault();
-  const col = e.currentTarget;
-  col.classList.remove('drag-over');
-  const targetCol = col.dataset.col;
-  const boardId   = col.dataset.bid;
-  if (!drag.cardId || !targetCol) return;
+  const colEl = e.currentTarget;
+  colEl.classList.remove('drag-over');
+  document.querySelectorAll('.card.drag-target-above, .card.drag-target-below')
+    .forEach(el => el.classList.remove('drag-target-above', 'drag-target-below'));
+
+  const targetColId = colEl.dataset.col;
+  const boardId     = colEl.dataset.bid;
+  if (!drag.cardId || !targetColId) return;
+
   const board = S.boards.find(b => b.id === boardId);
-  const card  = board?.cards.find(c => c.id === drag.cardId);
-  if (card) { card.col = targetCol; render(); }
+  if (!board) return;
+  const card = board.cards.find(c => c.id === drag.cardId);
+  if (!card) return;
+  const col = board.columns.find(c => c.id === targetColId);
+  if (!col) return;
+
+  // Determine insertion position from cursor Y vs rendered card midpoints
+  const cardEls = Array.from(colEl.querySelectorAll('.cards-list .card'));
+  let insertBefore = null; // null = append to end
+  for (const cardEl of cardEls) {
+    if (cardEl.dataset.cid === drag.cardId) continue;
+    const rect = cardEl.getBoundingClientRect();
+    if (e.clientY < rect.top + rect.height / 2) {
+      insertBefore = cardEl.dataset.cid;
+      break;
+    }
+  }
+
+  // Cards in target column excluding the dragging card, in their current stored order
+  let targetColCards = board.cards.filter(c => c.col === targetColId && c.id !== drag.cardId);
+
+  // If column was priority-sorted, reconstruct that visual order so the insertion
+  // point matches what the user actually saw while dragging
+  if (col.sortMode !== 'custom') {
+    const P = { high: 0, medium: 1, low: 2 };
+    targetColCards = targetColCards.slice().sort((a, b) => (P[a.priority] ?? 1) - (P[b.priority] ?? 1));
+  }
+
+  // Update card's column assignment
+  card.col = targetColId;
+
+  // Insert dragging card at determined position
+  if (insertBefore === null) {
+    targetColCards.push(card);
+  } else {
+    const idx = targetColCards.findIndex(c => c.id === insertBefore);
+    targetColCards.splice(idx === -1 ? targetColCards.length : idx, 0, card);
+  }
+
+  // Rebuild board.cards: non-target-col cards first, then target col in new order
+  board.cards = [
+    ...board.cards.filter(c => c.col !== targetColId && c.id !== drag.cardId),
+    ...targetColCards
+  ];
+
+  col.sortMode = 'custom';
   drag.cardId = null;
+  render();
+}
+
+function sortColByPriority(boardId, colId) {
+  const board = S.boards.find(b => b.id === boardId);
+  if (!board) return;
+  const col = board.columns.find(c => c.id === colId);
+  if (!col) return;
+  const P = { high: 0, medium: 1, low: 2 };
+  const colCards   = board.cards.filter(c => c.col === colId);
+  const otherCards = board.cards.filter(c => c.col !== colId);
+  colCards.sort((a, b) => (P[a.priority] ?? 1) - (P[b.priority] ?? 1));
+  board.cards = [...otherCards, ...colCards];
+  delete col.sortMode;
+  render();
 }
 
 // ════════════════════════════════════════════════════════════

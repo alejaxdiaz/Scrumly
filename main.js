@@ -5,6 +5,23 @@ const fs   = require('fs');
 let win;
 let quickAddWin = null;
 
+// ── Single-instance lock ───────────────────────────────────
+const gotLock = app.requestSingleInstanceLock();
+
+if (!gotLock) {
+  // A second instance tried to launch — quit immediately so the
+  // existing instance keeps sole control of the LevelDB lock.
+  app.quit();
+} else {
+  // Forward second-instance activations to the running window.
+  app.on('second-instance', () => {
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
+  });
+}
+
 const QA_W = 430;
 const QA_H = 590;
 
@@ -137,7 +154,10 @@ ipcMain.on('win-maximize', () => {
   win.isMaximized() ? win.unmaximize() : win.maximize();
 });
 
-ipcMain.on('win-close', () => win?.close());
+ipcMain.on('win-close', () => {
+  if (quickAddWin && !quickAddWin.isDestroyed()) quickAddWin.destroy();
+  win?.close();
+});
 
 ipcMain.handle('win-is-maximized', () => win?.isMaximized() ?? false);
 
