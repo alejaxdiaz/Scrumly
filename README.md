@@ -15,10 +15,12 @@ Windows x64 — one-click NSIS installer, no admin rights required. Your board d
 ## Features
 
 - **Multiple boards** — create, rename, and delete boards from the sidebar
-- **Columns** — fully customizable; each column has a color-coded pip and an editable name
+- **Columns** — fully customizable; each column has a color-coded pip and an inline-editable name (click to rename, Enter or blur to save)
 - **Cards** — title, description, priority (low / medium / high), comma-separated tags, and links
 - **Links on cards** — paste any URL and it renders as a clickable chip. Discord, GitHub, and Figma links get service-specific icons. Clicking opens the native app if installed, otherwise falls back to the browser
-- **Drag & drop** — move cards between columns with HTML5 drag events
+- **Drag & drop** — move cards between columns or reorder within a column; a blue indicator line shows exactly where the card will land
+- **Priority sort** — each column defaults to sorting cards high → medium → low automatically
+- **Custom ordering** — dragging a card to a specific position locks that column into custom order; a "sort by priority" button appears on hover to reset it
 - **Progress bar** — completion percentage (cards in "Done" columns vs total)
 - **Colored tags** — each tag is consistently hashed to a hue so the same tag always gets the same color
 - **Persistent state** — everything saved to `localStorage` on every mutation; survives restarts
@@ -169,7 +171,7 @@ S = {
     {
       id: string,
       name: string,
-      columns: [{ id, name, color }],
+      columns: [{ id, name, color, sortMode? }],  // sortMode: 'custom' | absent (defaults to priority sort)
       cards:   [{ id, col, title, desc, priority, tags, links }]
     }
   ],
@@ -179,7 +181,7 @@ S = {
 
 Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launch a set of demo boards is loaded.
 
-**Render cycle:** every mutation calls `render()` → `renderSidebar()` + `renderMain()` + `save()`. Full DOM re-render, no virtual DOM.
+**Render cycle:** every mutation calls `render()` → `renderSidebar()` + `renderMain()` + `save()`. Full DOM re-render, no virtual DOM. Columns without `sortMode: 'custom'` have their cards sorted high → medium → low at render time; custom-ordered columns render cards in their stored array order.
 
 ---
 
@@ -194,6 +196,8 @@ Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launc
 | `Escape` | Card modal | Close without saving |
 | `Escape` | Name modal | Cancel |
 | `Escape` | Quick Add popup | Close popup |
+| Click column name | Column header | Rename inline (blur or Enter to save) |
+| Sort icon (hover) | Custom-ordered column | Reset column to priority sort |
 
 The global shortcut is configurable — click **Quick Add** in the sidebar and press **Rebind**.
 
