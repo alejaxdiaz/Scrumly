@@ -5,7 +5,9 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win --x64"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac"
   },
   "devDependencies": {
     "electron": "^28.3.3",
@@ -15,6 +17,11 @@
     "appId": "com.scrumly.board",
     "productName": "Scrumly",
     "copyright": "Personal use",
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "icon": "assets/scrumly_icon.png",
+      "category": "public.app-category.productivity"
+    },
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
       "icon": "assets/scrumly_icon.ico"

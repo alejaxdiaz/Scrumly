@@ -8,7 +8,7 @@ A personal Kanban / Scrum board desktop app built with Electron. Frameless, dark
 
 **[→ Download the latest installer from Releases](../../releases/latest)**
 
-Windows x64 — one-click NSIS installer, no admin rights required. Your board data is never sent anywhere; everything is stored locally.
+Windows x64 (NSIS installer) and macOS (DMG, Apple Silicon + Intel). Your board data is never sent anywhere; everything is stored locally.
 
 ---
 
@@ -20,6 +20,7 @@ Windows x64 — one-click NSIS installer, no admin rights required. Your board d
 - **Links on cards** — paste any URL and it renders as a clickable chip. Discord, GitHub, and Figma links get service-specific icons. Clicking opens the native app if installed, otherwise falls back to the browser
 - **Drag & drop** — move cards between columns or reorder within a column; a blue indicator line shows exactly where the card will land
 - **Priority sort** — each column defaults to sorting cards high → medium → low automatically
+- **Deadlines (ETA)** — optional date per card (in the card editor and Quick Add), shown as a colored chip on the card (Today / Tomorrow / upcoming / overdue). Cards due *today* are pinned to the top of their column automatically
 - **Custom ordering** — dragging a card to a specific position locks that column into custom order; a "sort by priority" button appears on hover to reset it
 - **Progress bar** — completion percentage (cards in "Done" columns vs total)
 - **Colored tags** — each tag is consistently hashed to a hue so the same tag always gets the same color
@@ -32,13 +33,13 @@ Windows x64 — one-click NSIS installer, no admin rights required. Your board d
 
 ## Quick Add
 
-Press **`Ctrl + Numpad 0`** from anywhere — even while Discord, a browser, or any other app is in focus — to open the Quick Add popup.
+Press **`Ctrl + Numpad 0`** from anywhere (macOS: **`⌘ + Shift + Space`** — Macs have no numpad) — even while Discord, a browser, or any other app is in focus — to open the Quick Add popup.
 
 The popup lets you pick a board and column, then fill in all card fields (title, description, priority, tags, links) without switching away from what you're doing. The card is added to Scrumly immediately on save.
 
 The popup stays open when you click away (so you can grab a Discord link or look something up), and only closes when you explicitly save or dismiss it.
 
-**Changing the shortcut:** click the **Quick Add** button at the bottom of the sidebar → **Rebind** → press any key combination. The new shortcut is saved to `%AppData%\Scrumly\scrumly-settings.json` and persists across restarts.
+**Changing the shortcut:** click the **Quick Add** button at the bottom of the sidebar → **Rebind** → press any key combination. The new shortcut is saved to the platform user-data dir (`%AppData%\Scrumly\` on Windows, `~/Library/Application Support/Scrumly/` on macOS) as `scrumly-settings.json` and persists across restarts.
 
 ---
 
@@ -57,11 +58,15 @@ npm install
 # 3. Run in development (no build step needed)
 npm start
 
-# 4. Build the Windows installer (outputs to dist/)
+# 4. Build an installer for your current platform (outputs to dist/)
 npm run build
+
+# Or build for a specific platform
+npm run build:win   # Windows x64 NSIS installer
+npm run build:mac   # macOS DMG (arm64 + x64)
 ```
 
-The app runs directly from source — `index.html` is served as-is by Electron. The installer is produced by electron-builder and requires `assets/scrumly_icon.ico` to be present.
+The app runs directly from source — `index.html` is served as-is by Electron. Installers are produced by electron-builder; Windows builds require `assets/scrumly_icon.ico`, macOS builds derive `.icns` from `assets/scrumly_icon.png` automatically.
 
 ---
 
@@ -72,8 +77,8 @@ The app runs directly from source — `index.html` is served as-is by Electron. 
 | Shell | [Electron](https://electronjs.org) 28 |
 | Renderer | Vanilla HTML + CSS + JS (no framework) |
 | Fonts | Bricolage Grotesque · DM Sans via Google Fonts |
-| Packaging | electron-builder 24 · Windows x64 NSIS installer |
-| Persistence | `localStorage` (`scrumly_v2` key) · `%AppData%\Scrumly\scrumly-settings.json` |
+| Packaging | electron-builder 24 · NSIS (Windows x64) · DMG (macOS arm64 + x64) |
+| Persistence | `localStorage` (`scrumly_v2` key) · settings in platform user-data dir |
 
 ---
 
@@ -88,7 +93,8 @@ scrumly/
 ├── quick-add.html       — Quick Add popup: board/column select + card form
 ├── package.json
 └── assets/
-    └── scrumly_icon.ico — App icon (required for builds)
+    ├── scrumly_icon.ico  — Windows icon (required for Windows builds)
+    └── scrumly_icon.png  — macOS/Dock icon, 1024×1024 (required for macOS builds)
 ```
 
 ---
@@ -172,7 +178,7 @@ S = {
       id: string,
       name: string,
       columns: [{ id, name, color, sortMode? }],  // sortMode: 'custom' | absent (defaults to priority sort)
-      cards:   [{ id, col, title, desc, priority, tags, links }]
+      cards:   [{ id, col, title, desc, priority, tags, links, deadline? }]  // deadline: 'YYYY-MM-DD' or null
     }
   ],
   activeId: string
@@ -181,7 +187,7 @@ S = {
 
 Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launch a set of demo boards is loaded.
 
-**Render cycle:** every mutation calls `render()` → `renderSidebar()` + `renderMain()` + `save()`. Full DOM re-render, no virtual DOM. Columns without `sortMode: 'custom'` have their cards sorted high → medium → low at render time; custom-ordered columns render cards in their stored array order.
+**Render cycle:** every mutation calls `render()` → `renderSidebar()` + `renderMain()` + `save()`. Full DOM re-render, no virtual DOM. Columns without `sortMode: 'custom'` have their cards sorted high → medium → low at render time (cards whose deadline is today are pinned above everything else); custom-ordered columns render cards in their stored array order.
 
 ---
 
@@ -189,7 +195,7 @@ Persisted to `localStorage` under `scrumly_v2` on every mutation. On first launc
 
 | Key | Context | Action |
 |---|---|---|
-| `Ctrl + Numpad 0` | Global (any app) | Open Quick Add popup |
+| `Ctrl + Numpad 0` / `⌘ + Shift + Space` (macOS) | Global (any app) | Open Quick Add popup |
 | `Enter` | Card title field | Save card |
 | `Enter` | Link URL field | Add link |
 | `Enter` | Name modal input | Confirm |
@@ -223,6 +229,6 @@ All colors, radii, and shadows are CSS custom properties on `:root` in `index.ht
 ## Data & Privacy
 
 - Board data: `localStorage.scrumly_v2` (stays on your machine)
-- Settings: `%AppData%\Scrumly\scrumly-settings.json` (shortcut preference)
+- Settings: platform user-data dir (`%AppData%\Scrumly\scrumly-settings.json` on Windows, `~/Library/Application Support/Scrumly/scrumly-settings.json` on macOS)
 - No accounts, no sync, no telemetry
 - No migrations exist. If the schema changes in a future version, clearing `scrumly_v2` from DevTools resets to the demo boards

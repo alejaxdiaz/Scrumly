@@ -47,7 +47,7 @@
       --body: 'DM Sans', sans-serif;
     }
 
-    html, body { height: 100%; overflow: hidden; }
+    html, body { height: 100%; overflow: hidden; color-scheme: dark; }
 
     body {
       font-family: var(--body);
@@ -448,6 +448,23 @@
       border-radius: 3px; padding: 2px 6px;
       font-family: var(--ui); letter-spacing: .15px;
     }
+
+    /* ══ DEADLINE CHIP ═══════════════════════════════════════ */
+    .card-eta {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 6px;
+      padding: 2px 7px 2px 6px;
+      border-radius: 4px;
+      font-size: 10px; font-family: var(--ui); font-weight: 600; letter-spacing: .25px;
+      border: 1px solid var(--border);
+      color: var(--text-2); background: var(--col-bg);
+    }
+
+    .card-eta svg { width: 9px; height: 9px; flex-shrink: 0; }
+
+    .card-eta.today   { color: #FBBF24; border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.1); }
+    .card-eta.overdue { color: #F87171; border-color: rgba(239,68,68,.45);  background: rgba(239,68,68,.1); }
+    .card-eta.future  { color: #4ADE80; border-color: rgba(34,197,94,.4);   background: rgba(34,197,94,.08); }
 
     .card-actions {
       position: absolute; top: 8px; right: 8px;
@@ -900,6 +917,13 @@
         <textarea class="f-textarea" id="c-desc" placeholder="Add notes, details, or context…"></textarea>
       </div>
       <div class="f-group">
+        <label class="f-label" for="c-deadline">Deadline (optional)</label>
+        <div class="link-add-row">
+          <input class="f-input" id="c-deadline" type="date">
+          <button class="link-add-btn" id="c-deadline-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="f-group">
         <span class="f-label">Priority</span>
         <div class="priority-row">
           <div class="p-opt low">
@@ -1163,6 +1187,47 @@ function tagStyle(tag) {
   return `color:hsl(${hue},75%,70%);background:hsl(${hue},55%,18%)`;
 }
 
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function parseDate(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function dayDiff(s) {
+  const a = parseDate(s);
+  const b = new Date();
+  b.setHours(0, 0, 0, 0);
+  return Math.round((a - b) / 864e5);
+}
+
+function fmtDate(s) {
+  return parseDate(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function etaHtml(card) {
+  if (!card.deadline) return '';
+  const days  = dayDiff(card.deadline);
+  const cls   = days < 0 ? 'overdue' : days === 0 ? 'today' : 'future';
+  const label = days < 0 ? 'Overdue' : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : fmtDate(card.deadline);
+  return `
+    <div class="card-eta ${cls}">
+      <svg viewBox="0 0 12 12" fill="none"><rect x="1.5" y="2.5" width="9" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5h9M4 1.5v2M8 1.5v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span>${esc(label)}</span>
+    </div>`;
+}
+
+function compareCards(a, b) {
+  const P = { high: 0, medium: 1, low: 2 };
+  const da = a.deadline === todayStr() ? 0 : 1;
+  const db = b.deadline === todayStr() ? 0 : 1;
+  if (da !== db) return da - db;
+  return (P[a.priority] ?? 1) - (P[b.priority] ?? 1);
+}
+
 function linkMeta(url) {
   try {
     const u = new URL(url.startsWith('http') ? url : 'https://' + url);
@@ -1336,13 +1401,10 @@ function renderMain() {
 }
 
 function renderColumn(board, col) {
-  const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
   let cards = board.cards.filter(c => c.col === col.id);
 
   if (col.sortMode !== 'custom') {
-    cards = cards.slice().sort((a, b) =>
-      (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1)
-    );
+    cards = cards.slice().sort(compareCards);
   }
 
   const sortBtn = col.sortMode === 'custom'
@@ -1401,6 +1463,7 @@ function renderCard(card) {
       </div>
       <div class="card-title">${esc(card.title)}</div>
       ${card.desc ? `<div class="card-desc">${esc(card.desc)}</div>` : ''}
+      ${etaHtml(card)}
       ${tagsHtml}
       ${renderCardLinks(card.links)}
     </div>`;
@@ -1492,6 +1555,7 @@ function openAddCard(boardId, colId) {
   document.getElementById('c-title').value = '';
   document.getElementById('c-desc').value  = '';
   document.getElementById('c-tags').value  = '';
+  document.getElementById('c-deadline').value = '';
   document.getElementById('p-med').checked = true;
   document.getElementById('c-title').classList.remove('err');
   modalLinks = [];
@@ -1510,6 +1574,7 @@ function openEditCard(cardId) {
   document.getElementById('c-title').value = card.title;
   document.getElementById('c-desc').value  = card.desc || '';
   document.getElementById('c-tags').value  = (card.tags || []).join(', ');
+  document.getElementById('c-deadline').value = card.deadline || '';
   const p = card.priority || 'medium';
   document.getElementById(p === 'high' ? 'p-high' : p === 'low' ? 'p-low' : 'p-med').checked = true;
   document.getElementById('c-title').classList.remove('err');
@@ -1531,15 +1596,16 @@ function saveCard() {
   const desc     = document.getElementById('c-desc').value.trim();
   const tags     = document.getElementById('c-tags').value.split(',').map(t => t.trim()).filter(Boolean);
   const links    = modalLinks.slice();
+  const deadline = document.getElementById('c-deadline').value || null;
   const priority = document.querySelector('input[name="p"]:checked')?.value || 'medium';
   const board    = S.boards.find(b => b.id === cardModal.boardId);
   if (!board) return;
 
   if (cardModal.mode === 'add') {
-    board.cards.push({ id: uid(), col: cardModal.colId, title, desc, priority, tags, links });
+    board.cards.push({ id: uid(), col: cardModal.colId, title, desc, priority, tags, links, deadline });
   } else {
     const card = board.cards.find(c => c.id === cardModal.cardId);
-    if (card) Object.assign(card, { title, desc, priority, tags, links });
+    if (card) Object.assign(card, { title, desc, priority, tags, links, deadline });
   }
 
   closeOverlay('card-overlay');
@@ -1638,8 +1704,7 @@ function onDrop(e) {
   // If column was priority-sorted, reconstruct that visual order so the insertion
   // point matches what the user actually saw while dragging
   if (col.sortMode !== 'custom') {
-    const P = { high: 0, medium: 1, low: 2 };
-    targetColCards = targetColCards.slice().sort((a, b) => (P[a.priority] ?? 1) - (P[b.priority] ?? 1));
+    targetColCards = targetColCards.slice().sort(compareCards);
   }
 
   // Update card's column assignment
@@ -1669,10 +1734,9 @@ function sortColByPriority(boardId, colId) {
   if (!board) return;
   const col = board.columns.find(c => c.id === colId);
   if (!col) return;
-  const P = { high: 0, medium: 1, low: 2 };
   const colCards   = board.cards.filter(c => c.col === colId);
   const otherCards = board.cards.filter(c => c.col !== colId);
-  colCards.sort((a, b) => (P[a.priority] ?? 1) - (P[b.priority] ?? 1));
+  colCards.sort(compareCards);
   board.cards = [...otherCards, ...colCards];
   delete col.sortMode;
   render();
@@ -1722,6 +1786,7 @@ document.getElementById('card-close').onclick  = () => closeOverlay('card-overla
 document.getElementById('card-cancel').onclick = () => closeOverlay('card-overlay');
 document.getElementById('card-save').onclick   = saveCard;
 document.getElementById('link-add-btn').onclick = addModalLink;
+document.getElementById('c-deadline-clear').onclick = () => { document.getElementById('c-deadline').value = ''; };
 document.getElementById('c-link-url').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addModalLink(); }
 });
@@ -1903,6 +1968,7 @@ if (isElectron) {
       priority: cardData.priority || 'medium',
       tags:     cardData.tags     || [],
       links:    cardData.links    || [],
+      deadline: cardData.deadline || null,
     });
     render();
   });

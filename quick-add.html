@@ -47,6 +47,7 @@
       -webkit-font-smoothing: antialiased;
       border-radius: var(--r-lg);
       border: 1px solid var(--border);
+      color-scheme: dark;
     }
 
     body {
@@ -309,6 +310,14 @@
   </div>
 
   <div class="f-group">
+    <label class="f-label" for="qa-deadline">Deadline (optional)</label>
+    <div class="link-add-row">
+      <input class="f-input" id="qa-deadline" type="date">
+      <button class="link-add-btn" id="qa-deadline-clear" type="button">Clear</button>
+    </div>
+  </div>
+
+  <div class="f-group">
     <span class="f-label">Priority</span>
     <div class="priority-row">
       <div class="p-opt low">
@@ -403,6 +412,7 @@ function populateUI() {
   document.getElementById('qa-title').value = '';
   document.getElementById('qa-desc').value  = '';
   document.getElementById('qa-tags').value  = '';
+  document.getElementById('qa-deadline').value = '';
   document.getElementById('qa-p-med').checked = true;
   document.getElementById('qa-title').classList.remove('err');
   document.getElementById('qa-link-url').value = '';
@@ -490,6 +500,7 @@ function removeLink(i) {
 }
 
 document.getElementById('qa-link-add-btn').onclick = addLink;
+document.getElementById('qa-deadline-clear').onclick = () => { document.getElementById('qa-deadline').value = ''; };
 document.getElementById('qa-link-url').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addLink(); }
 });
@@ -513,8 +524,9 @@ function saveCard() {
   const tags     = document.getElementById('qa-tags').value.split(',').map(t => t.trim()).filter(Boolean);
   const priority = document.querySelector('input[name="qa-p"]:checked')?.value || 'medium';
   const links    = modalLinks.slice();
+  const deadline = document.getElementById('qa-deadline').value || null;
 
-  window.quickAddAPI.saveCard({ boardId, colId, title, desc, priority, tags, links });
+  window.quickAddAPI.saveCard({ boardId, colId, title, desc, priority, tags, links, deadline });
 }
 
 // ── Event bindings ─────────────────────────────────────────

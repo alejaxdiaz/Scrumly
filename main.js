@@ -30,7 +30,8 @@ const settingsPath = path.join(app.getPath('userData'), 'scrumly-settings.json')
 
 function loadSettings() {
   try { return JSON.parse(fs.readFileSync(settingsPath, 'utf8')); } catch(_) {}
-  return { quickAddShortcut: 'Control+num0' };
+  const defaultShortcut = process.platform === 'darwin' ? 'CommandOrControl+Shift+Space' : 'Control+num0';
+  return { quickAddShortcut: defaultShortcut };
 }
 
 function saveSettings(s) {
@@ -116,7 +117,7 @@ function createWindow() {
     frame:     false,
     transparent: false,
     backgroundColor: '#111110',
-    icon:      path.join(__dirname, 'assets', 'scrumly_icon.ico'),
+    icon:      path.join(__dirname, 'assets', process.platform === 'darwin' ? 'scrumly_icon.png' : 'scrumly_icon.ico'),
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

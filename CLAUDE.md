@@ -6,14 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm start          # Launch the Electron app
-npm run build      # Build Windows 64-bit NSIS installer (outputs to dist/)
+npm run build      # Build installer for current platform (outputs to dist/)
+npm run build:win  # Build Windows x64 NSIS installer
+npm run build:mac  # Build macOS DMG (arm64 + x64)
 ```
 
 There are no lint, test, or type-check commands — this project has no TypeScript, ESLint, or test framework.
 
 ## Architecture
 
-**Scrumly** is a frameless Electron desktop app (Windows 64-bit target) for personal Kanban/Scrum board management. The entire UI and application logic is contained in a single file:
+**Scrumly** is a frameless Electron desktop app (Windows + macOS) for personal Kanban/Scrum board management. The entire UI and application logic is contained in a single file:
 
 - `main.js` — Electron main process. Creates a frameless `BrowserWindow`, handles IPC for window controls (minimize/maximize/close), enforces min size 900×600.
 - `preload.js` — Context bridge exposing `window.winAPI` (minimize, maximize, close, isMaximized, onMaximized) to the renderer safely.
@@ -25,7 +27,7 @@ Global state is a single object `S` (in `index.html`) with this shape:
 
 ```js
 {
-  boards: [{ id, name, columns: [{ id, name, color }], cards: [{ id, col, title, desc, priority, tags }] }],
+  boards: [{ id, name, columns: [{ id, name, color }], cards: [{ id, col, title, desc, priority, tags, links, deadline }] }],
   activeId: string
 }
 ```
