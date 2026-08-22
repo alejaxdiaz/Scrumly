@@ -22,7 +22,8 @@
       "icon": "assets/scrumly_icon.png",
       "category": "public.app-category.productivity",
       "hardenedRuntime": false,
-      "notarize": false
+      "notarize": false,
+      "identity": null
     },
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
