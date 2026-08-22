@@ -848,6 +848,141 @@
     }
 
     .shortcut-err.show { display: block; }
+
+    /* ══ ARCHIVE ══════════════════════════════════════════════ */
+    .card-act-btn.archive:hover { background: #8B5CF6; color: #fff; }
+
+    .archive-popup {
+      position: fixed; z-index: 2000;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--sh-lg);
+      padding: 4px; min-width: 170px;
+      animation: fadeUp .12s ease both;
+    }
+
+    .archive-popup-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border: none; background: none;
+      width: 100%; text-align: left;
+      border-radius: var(--r-sm); cursor: pointer;
+      font-size: 12px; font-family: var(--body);
+      color: var(--text-2);
+      transition: background .12s, color .12s;
+    }
+
+    .archive-popup-item:hover { background: rgba(255,255,255,.06); color: var(--text); }
+
+    .archive-popup-pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    .col-archive-btn {
+      margin-left: auto;
+      font-size: 10px; font-family: var(--ui); font-weight: 600;
+      padding: 2px 7px;
+      border: 1px solid var(--border); background: var(--col-bg);
+      color: var(--text-muted); border-radius: 4px;
+      cursor: pointer; opacity: 0; white-space: nowrap;
+      transition: opacity .14s, background .14s, color .14s, border-color .14s;
+    }
+
+    .column:hover .col-archive-btn { opacity: 1; }
+    .col-archive-btn:hover { background: rgba(139,92,246,.12); color: #8B5CF6; border-color: rgba(139,92,246,.4); }
+
+    #archive-overlay .modal {
+      width: 560px; max-width: calc(100vw - 32px);
+      max-height: 80vh; display: flex; flex-direction: column;
+    }
+
+    .archive-tabs {
+      display: flex; gap: 2px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .archive-tab {
+      padding: 10px 14px;
+      font-family: var(--ui); font-size: 12px; font-weight: 600;
+      color: var(--text-muted); background: none; border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color .14s, border-color .14s;
+    }
+
+    .archive-tab:hover { color: var(--text-2); }
+    .archive-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .archive-tab-count {
+      font-size: 10px; background: rgba(255,255,255,.07);
+      border-radius: 4px; padding: 1px 5px; margin-left: 5px;
+    }
+
+    .archive-body {
+      flex: 1; overflow-y: auto; padding: 14px 18px;
+    }
+
+    .archive-empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-muted); font-size: 13px;
+    }
+
+    .archive-empty-icon {
+      width: 48px; height: 48px;
+      background: var(--col-bg); border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; color: var(--text-muted);
+    }
+
+    .archive-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .archive-card-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r-md);
+      padding: 10px 12px;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+
+    .archive-card-info { flex: 1; min-width: 0; }
+
+    .archive-card-title {
+      font-family: var(--ui); font-size: 12.5px; font-weight: 600;
+      color: var(--text); margin-bottom: 2px;
+    }
+
+    .archive-card-meta {
+      font-size: 10.5px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .archive-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .archive-card-actions .card-act-btn { opacity: 1; }
+
+    .board-header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .board-archive-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 10px;
+      border: 1px solid var(--border); background: var(--col-bg);
+      border-radius: var(--r-sm); cursor: pointer;
+      color: var(--text-muted);
+      font-family: var(--ui); font-size: 11.5px; font-weight: 600;
+      transition: all .14s; white-space: nowrap;
+    }
+
+    .board-archive-btn:hover {
+      background: rgba(139,92,246,.1); color: #8B5CF6;
+      border-color: rgba(139,92,246,.35);
+    }
+
+    .board-archive-btn svg { width: 13px; height: 13px; }
+
+    .archive-badge {
+      background: rgba(139,92,246,.2); color: #8B5CF6;
+      border-radius: 4px; padding: 0 5px;
+      font-size: 10px; line-height: 16px;
+    }
   </style>
 </head>
 <body>
@@ -1008,6 +1143,35 @@
   </div>
 </div>
 
+<!-- ══ ARCHIVE OVERLAY ════════════════════════════════════════════ -->
+<div class="overlay" id="archive-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Archived Cards</span>
+      <button class="modal-x" id="archive-close">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="archive-tabs" id="archive-tabs"></div>
+    <div class="archive-body" id="archive-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="archive-done">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ARCHIVE POPUP ════════════════════════════════════════════ -->
+<div class="archive-popup" id="archive-popup" style="display:none">
+  <button class="archive-popup-item" onclick="archiveCardTo('completed')">
+    <span class="archive-popup-pip" style="background:#34D399"></span>
+    Move to Completed
+  </button>
+  <button class="archive-popup-item" onclick="archiveCardTo('later')">
+    <span class="archive-popup-pip" style="background:#FBBF24"></span>
+    Move to Later
+  </button>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════════
 // WINDOW CONTROLS
@@ -1056,6 +1220,11 @@ const DEFAULT_COLS = [
   { name:'Done',        color:'#34D399' },
 ];
 
+const DEFAULT_ARCHIVES = [
+  { id: 'completed', name: 'Completed', cards: [] },
+  { id: 'later', name: 'Later', cards: [] }
+];
+
 const SAMPLE = {
   boards: [
     {
@@ -1080,7 +1249,8 @@ const SAMPLE = {
         { id:'b1c9',  col:'b1-col-4', title:'Beta tester feedback synthesis',     desc:'Aggregate survey results from 40 beta users into actionable insights.',         priority:'medium', tags:['research'] },
         { id:'b1c10', col:'b1-col-5', title:'Domain & SSL setup',                 desc:'Pointed DNS, provisioned certificate, and verified redirect rules.',            priority:'low',    tags:['infra'] },
         { id:'b1c11', col:'b1-col-5', title:'Stakeholder sign-off on copy',       desc:'Final approval received from legal and marketing leads.',                       priority:'low',    tags:['copy'] },
-      ]
+      ],
+      archives: JSON.parse(JSON.stringify(DEFAULT_ARCHIVES))
     },
     {
       id: 'board-2',
@@ -1104,7 +1274,8 @@ const SAMPLE = {
         { id:'b2c9',  col:'b2-col-4', title:'Performance profiling',               desc:'Reduce cold start time from 1.8s to under 800ms on mid-range devices.',        priority:'high',   tags:['performance'] },
         { id:'b2c10', col:'b2-col-5', title:'App Store screenshots',               desc:'6 localized screenshot sets created and uploaded.',                             priority:'low',    tags:['marketing'] },
         { id:'b2c11', col:'b2-col-5', title:'Crash reporting integration',         desc:'Sentry configured with release tracking and source maps.',                      priority:'low',    tags:['monitoring'] },
-      ]
+      ],
+      archives: JSON.parse(JSON.stringify(DEFAULT_ARCHIVES))
     },
     {
       id: 'board-3',
@@ -1127,7 +1298,8 @@ const SAMPLE = {
         { id:'b3c8',  col:'b3-col-4', title:'Button component variants',           desc:'Primary, secondary, ghost, and destructive states with loading spinner.',        priority:'medium', tags:['components'] },
         { id:'b3c9',  col:'b3-col-5', title:'Storybook setup',                     desc:'Auto-docs, controls, and a11y addon configured and deployed.',                   priority:'low',    tags:['docs','tooling'] },
         { id:'b3c10', col:'b3-col-5', title:'Figma variable sync',                 desc:'All tokens exported to Figma variables via Style Dictionary pipeline.',          priority:'low',    tags:['figma','tokens'] },
-      ]
+      ],
+      archives: JSON.parse(JSON.stringify(DEFAULT_ARCHIVES))
     }
   ],
   activeId: 'board-1'
@@ -1142,8 +1314,27 @@ let S = loadState();
 function loadState() {
   try {
     const raw = localStorage.getItem('scrumly_v2');
-    if (raw) return JSON.parse(raw);
-  } catch(_) {}
+    if (raw) {
+      const state = JSON.parse(raw);
+      if (!state.boards || !Array.isArray(state.boards)) {
+        localStorage.removeItem('scrumly_v2');
+        return JSON.parse(JSON.stringify(SAMPLE));
+      }
+      state.boards.forEach(b => {
+        if (!b.archives || !Array.isArray(b.archives)) {
+          b.archives = [
+            { id: 'completed', name: 'Completed', cards: [] },
+            { id: 'later', name: 'Later', cards: [] }
+          ];
+        }
+        if (!b.columns) b.columns = [];
+        if (!b.cards) b.cards = [];
+      });
+      return state;
+    }
+  } catch(_) {
+    localStorage.removeItem('scrumly_v2');
+  }
   return JSON.parse(JSON.stringify(SAMPLE));
 }
 
@@ -1319,9 +1510,11 @@ function openCardURL(btn) { openURL(btn.dataset.url); }
 // ════════════════════════════════════════════════════════════
 
 function render() {
-  renderSidebar();
-  renderMain();
-  save();
+  try {
+    renderSidebar();
+    renderMain();
+    save();
+  } catch(_) {}
 }
 
 function renderSidebar() {
@@ -1375,6 +1568,8 @@ function renderMain() {
   const done = board.cards.filter(c => doneIds.includes(c.col)).length;
   const pct = total ? Math.round(done / total * 100) : 0;
 
+  const archived = totalArchived(board);
+
   main.innerHTML = `
     <div class="board-header">
       <div class="board-title-wrap">
@@ -1386,9 +1581,16 @@ function renderMain() {
           <div class="board-progress-bar" style="width:${pct}%"></div>
         </div>
       </div>
-      <div class="board-meta">
-        <span class="meta-pill"><strong>${total}</strong> card${total !== 1 ? 's' : ''}</span>
-        <span class="meta-pill"><strong>${done}</strong> done</span>
+      <div class="board-header-right">
+        <div class="board-meta">
+          <span class="meta-pill"><strong>${total}</strong> card${total !== 1 ? 's' : ''}</span>
+          <span class="meta-pill"><strong>${done}</strong> done</span>
+        </div>
+        <button class="board-archive-btn" onclick="openArchivePanel()" title="View archived cards">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11v8h-11zM1 2.5h12v1.5H1zM5 6.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Archive
+          ${archived ? `<span class="archive-badge">${archived}</span>` : ''}
+        </button>
       </div>
     </div>
     <div class="board-area">
@@ -1417,6 +1619,11 @@ function renderColumn(board, col) {
        </button>`
     : '';
 
+  const isDoneCol = col.name.toLowerCase() === 'done';
+  const archiveBtn = isDoneCol && cards.length
+    ? `<button class="col-archive-btn" onclick="archiveDoneCards('${board.id}','${col.id}')" title="Archive all cards in this column">Archive All</button>`
+    : '';
+
   return `
     <div class="column"
          data-col="${col.id}" data-bid="${board.id}"
@@ -1430,6 +1637,7 @@ function renderColumn(board, col) {
                onkeydown="if(event.key==='Enter')this.blur()">
         <span class="col-count">${cards.length}</span>
         ${sortBtn}
+        ${archiveBtn}
         <button class="col-del-btn" onclick="deleteColumn('${board.id}','${col.id}')">
           <svg viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
@@ -1456,6 +1664,9 @@ function renderCard(card) {
       <div class="card-actions">
         <button class="card-act-btn" onclick="openEditCard('${card.id}')">
           <svg viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="card-act-btn archive" onclick="showArchivePopup(event,'${card.id}')">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9v7h-9zM1 2h10v1.5H1zM4.5 5.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="card-act-btn del" onclick="deleteCard('${card.id}')">
           <svg viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4 3V2h4v1M5 5.5v3M7 5.5v3M3 3l.5 6.5h5L9 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1950,6 +2161,21 @@ document.getElementById('settings-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget && !capturingShortcut) closeOverlay('settings-overlay');
 });
 
+// Archive overlay
+document.getElementById('archive-close').onclick  = () => closeOverlay('archive-overlay');
+document.getElementById('archive-done').onclick   = () => closeOverlay('archive-overlay');
+document.getElementById('archive-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeOverlay('archive-overlay');
+});
+
+// Close archive popup on outside click
+document.addEventListener('click', e => {
+  const popup = document.getElementById('archive-popup');
+  if (popup.style.display !== 'none' && !popup.contains(e.target) && !e.target.closest('.card-act-btn.archive')) {
+    hideArchivePopup();
+  }
+});
+
 // ════════════════════════════════════════════════════════════
 // RECEIVE CARDS FROM QUICK-ADD POPUP
 // ════════════════════════════════════════════════════════════
@@ -1977,6 +2203,162 @@ if (isElectron) {
   window.winAPI.getShortcut().then(acc => {
     document.getElementById('sidebar-shortcut-hint').textContent = shortDisplayShortcut(acc);
   });
+}
+
+// ════════════════════════════════════════════════════════════
+// ARCHIVE
+// ════════════════════════════════════════════════════════════
+
+let archiveState = { activeTab: 'completed', pendingCardId: null };
+
+function archiveCardTo(archiveId) {
+  const cardId = archiveState.pendingCardId;
+  if (!cardId) return;
+  const board = activeBoard();
+  if (!board || !board.archives) return;
+  const cardIdx = board.cards.findIndex(c => c.id === cardId);
+  if (cardIdx === -1) return;
+  const card = board.cards[cardIdx];
+  const archive = board.archives.find(a => a.id === archiveId);
+  if (!archive) return;
+  archive.cards.unshift({
+    ...card,
+    archivedAt: new Date().toISOString(),
+    fromCol: board.columns.find(c => c.id === card.col)?.name || 'Unknown'
+  });
+  board.cards.splice(cardIdx, 1);
+  hideArchivePopup();
+  render();
+}
+
+function archiveDoneCards(boardId, colId) {
+  const board = S.boards.find(b => b.id === boardId);
+  if (!board || !board.archives) return;
+  const archive = board.archives.find(a => a.id === 'completed');
+  if (!archive) return;
+  const cardsToArchive = board.cards.filter(c => c.col === colId);
+  if (!cardsToArchive.length) return;
+  if (!confirm(`Archive ${cardsToArchive.length} card${cardsToArchive.length !== 1 ? 's' : ''}?`)) return;
+  cardsToArchive.forEach(card => {
+    archive.cards.unshift({
+      ...card,
+      archivedAt: new Date().toISOString(),
+      fromCol: board.columns.find(c => c.id === card.col)?.name || 'Unknown'
+    });
+  });
+  board.cards = board.cards.filter(c => c.col !== colId);
+  render();
+}
+
+function showArchivePopup(e, cardId) {
+  e.stopPropagation();
+  archiveState.pendingCardId = cardId;
+  const popup = document.getElementById('archive-popup');
+  const rect = e.currentTarget.getBoundingClientRect();
+  popup.style.display = 'block';
+  popup.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
+  popup.style.top = (rect.bottom + 4) + 'px';
+}
+
+function hideArchivePopup() {
+  document.getElementById('archive-popup').style.display = 'none';
+  archiveState.pendingCardId = null;
+}
+
+function totalArchived(board) {
+  if (!board || !board.archives) return 0;
+  return board.archives.reduce((sum, a) => sum + a.cards.length, 0);
+}
+
+function openArchivePanel() {
+  try {
+    const board = activeBoard();
+    if (!board || !board.archives) return;
+    archiveState.activeTab = board.archives[0]?.id || 'completed';
+    renderArchivePanel();
+    openOverlay('archive-overlay');
+  } catch(_) {}
+}
+
+function renderArchivePanel() {
+  try {
+  const board = activeBoard();
+  if (!board) return;
+  const archives = board.archives || [];
+  document.getElementById('archive-tabs').innerHTML = archives.map(a => {
+    const active = a.id === archiveState.activeTab;
+    return `<button class="archive-tab ${active ? 'active' : ''}" onclick="switchArchiveTab('${a.id}')">
+      ${esc(a.name)}<span class="archive-tab-count">${a.cards.length}</span>
+    </button>`;
+  }).join('');
+  const archive = board.archives.find(a => a.id === archiveState.activeTab);
+  if (!archive || !archive.cards.length) {
+    document.getElementById('archive-body').innerHTML = `
+      <div class="archive-empty">
+        <div class="archive-empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/>
+          </svg>
+        </div>
+        No archived cards yet
+      </div>`;
+    return;
+  }
+  document.getElementById('archive-body').innerHTML = `<div class="archive-list">` +
+    archive.cards.map((card, i) => {
+      const tagsHtml = (card.tags || []).map(t => `<span class="tag" style="${tagStyle(t)}">${esc(t)}</span>`).join('');
+      return `
+        <div class="archive-card-item">
+          <div class="archive-card-info">
+            <div class="archive-card-title">${esc(card.title)}</div>
+            <div class="archive-card-meta">
+              <span>From: ${esc(card.fromCol || 'Unknown')}</span>
+              ${card.archivedAt ? `<span>${new Date(card.archivedAt).toLocaleDateString()}</span>` : ''}
+            </div>
+            ${tagsHtml ? `<div class="card-tags" style="margin-top:4px">${tagsHtml}</div>` : ''}
+          </div>
+          <div class="archive-card-actions">
+            <button class="card-act-btn" onclick="restoreArchivedCard('${archiveState.activeTab}',${i})" title="Restore to board">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6a4 4 0 1 1 1 2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M2 3v3h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="card-act-btn del" onclick="deleteArchivedCard('${archiveState.activeTab}',${i})" title="Delete permanently">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4 3V2h4v1M5 5.5v3M7 5.5v3M3 3l.5 6.5h5L9 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }).join('') + `</div>`;
+  } catch(_) {}
+}
+
+function switchArchiveTab(tabId) {
+  archiveState.activeTab = tabId;
+  renderArchivePanel();
+}
+
+function restoreArchivedCard(archiveId, cardIndex) {
+  const board = activeBoard();
+  if (!board || !board.archives) return;
+  const archive = board.archives.find(a => a.id === archiveId);
+  if (!archive || !archive.cards[cardIndex]) return;
+  const card = archive.cards[cardIndex];
+  let targetCol = board.columns.find(c => c.name.toLowerCase() === (card.fromCol || '').toLowerCase());
+  if (!targetCol) targetCol = board.columns[0];
+  if (!targetCol) return;
+  const { archivedAt, fromCol, ...cleanCard } = card;
+  cleanCard.col = targetCol.id;
+  board.cards.push(cleanCard);
+  archive.cards.splice(cardIndex, 1);
+  render();
+}
+
+function deleteArchivedCard(archiveId, cardIndex) {
+  const board = activeBoard();
+  if (!board || !board.archives) return;
+  const archive = board.archives.find(a => a.id === archiveId);
+  if (!archive || !archive.cards[cardIndex]) return;
+  if (!confirm(`Permanently delete "${archive.cards[cardIndex].title}"?`)) return;
+  archive.cards.splice(cardIndex, 1);
+  renderArchivePanel();
 }
 
 // ════════════════════════════════════════════════════════════
