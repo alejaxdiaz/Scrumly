@@ -10,8 +10,8 @@ A personal Kanban board desktop app built with Electron. Dark-themed, zero-depen
 
 | Platform | Format |
 |---|---|
-| Windows x64 | [Scrumly Setup 1.0.0.exe](../../releases/download/v1.1.0/Scrumly-Setup-1.0.0.exe) |
-| macOS (Apple Silicon + Intel) | [Scrumly-1.0.0.dmg](../../releases/download/v1.1.0/Scrumly-1.0.0.dmg) |
+| Windows x64 | [Scrumly Setup 1.2.0.exe](../../releases/download/v1.2.0/Scrumly.Setup.1.2.0.exe) |
+| macOS (Apple Silicon + Intel) | [Scrumly-1.2.0.dmg](../../releases/download/v1.2.0/Scrumly-1.2.0.dmg) |
 
 All data stays on your machine. No accounts, no sync, no telemetry.
 
@@ -31,6 +31,7 @@ All data stays on your machine. No accounts, no sync, no telemetry.
 - **Colored tags** — same tag always gets the same color
 - **Links** — paste any URL; Discord, GitHub, Figma, Notion, Linear, and Slack get service-specific icons and open natively when possible
 - **Deadlines (ETA)** — optional date per card, shown as a colored chip (Today / Tomorrow / upcoming / overdue); cards due today are pinned to the top
+- **Checklists / subtasks** — break a card into steps right in the editor; the first few items show directly on the card face and can be checked off with one click, no need to open the card
 
 ### Archive
 - **Per-board archives** with two categories: **Completed** and **Later**
@@ -117,8 +118,8 @@ Scrumly/
 Releases are automated via GitHub Actions. Push a tag to build and publish both installers:
 
 ```bash
-git tag v1.1.0
-git push origin v1.1.0
+git tag v1.2.1
+git push origin v1.2.1
 ```
 
 This triggers the workflow at `.github/workflows/release.yml`, which builds the Windows `.exe` and macOS `.dmg` and creates a GitHub Release with both files attached.

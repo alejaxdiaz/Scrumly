@@ -761,6 +761,113 @@
     .card-link.figma { border-color: rgba(162,89,255,.25); color: #a259ff; background: rgba(162,89,255,.07); }
     .card-link.figma:hover { border-color: rgba(162,89,255,.5); background: rgba(162,89,255,.15); }
 
+    /* ══ CHECKLIST (on-card) ═════════════════════════════════ */
+    .card-checklist {
+      display: flex; flex-direction: column; gap: 3px;
+      margin-top: 7px;
+    }
+
+    .card-checklist-item {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none; padding: 0;
+      width: 100%; cursor: pointer; text-align: left;
+      font-family: var(--body);
+    }
+
+    .card-chk-box {
+      width: 13px; height: 13px; flex-shrink: 0;
+      border: 1.5px solid var(--border); border-radius: 3.5px;
+      background: var(--col-bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .14s, border-color .14s;
+    }
+
+    .card-checklist-item:hover .card-chk-box { border-color: var(--accent); }
+    .card-checklist-item.done .card-chk-box { background: var(--accent); border-color: var(--accent); }
+    .card-chk-box svg { width: 8px; height: 8px; opacity: 0; transition: opacity .1s; }
+    .card-checklist-item.done .card-chk-box svg { opacity: 1; }
+
+    .card-checklist-item-text {
+      flex: 1; min-width: 0;
+      font-size: 11px; color: var(--text-2);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: color .14s;
+    }
+
+    .card-checklist-item.done .card-checklist-item-text {
+      color: var(--text-muted); text-decoration: line-through;
+    }
+
+    .card-checklist-more {
+      font-size: 10.5px; color: var(--text-muted);
+      background: none; border: none; padding: 1px 0 0 19px; margin: 0;
+      cursor: pointer; text-align: left; font-family: var(--body);
+      transition: color .14s;
+    }
+
+    .card-checklist-more:hover { color: var(--accent); text-decoration: underline; }
+
+    .modal-checklist-progress { display: flex; align-items: center; gap: 8px; }
+
+    .modal-checklist-progress-bar {
+      flex: 1; height: 4px; background: var(--col-bg);
+      border-radius: 2px; overflow: hidden;
+    }
+
+    .modal-checklist-progress-fill {
+      height: 100%; background: var(--accent); border-radius: 2px;
+      transition: width .2s ease;
+    }
+
+    .modal-checklist-progress-label {
+      font-size: 10.5px; color: var(--text-muted);
+      font-family: var(--ui); font-weight: 600; white-space: nowrap;
+    }
+
+    .modal-checklist-list { display: flex; flex-direction: column; gap: 4px; }
+
+    .modal-checklist-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px;
+      background: var(--col-bg); border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      animation: fadeUp .14s ease both;
+    }
+
+    .chk-box {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 1.5px solid var(--border); border-radius: 4px;
+      background: var(--surface); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .14s, border-color .14s;
+    }
+
+    .chk-box:hover { border-color: var(--accent); }
+    .chk-box.checked { background: var(--accent); border-color: var(--accent); }
+    .chk-box svg { width: 10px; height: 10px; opacity: 0; transition: opacity .1s; }
+    .chk-box.checked svg { opacity: 1; }
+
+    .modal-checklist-text {
+      flex: 1; min-width: 0;
+      font-size: 12.5px; font-family: var(--body); color: var(--text);
+      background: none; border: none; outline: none;
+    }
+
+    .modal-checklist-item.done .modal-checklist-text {
+      color: var(--text-muted); text-decoration: line-through;
+    }
+
+    .modal-checklist-del {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: none; background: none; border-radius: 3px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: background .14s, color .14s;
+    }
+
+    .modal-checklist-del:hover { background: rgba(239,68,68,.15); color: #ef4444; }
+    .modal-checklist-del svg { width: 8px; height: 8px; }
+
     /* ══ SCROLLBARS ══════════════════════════════════════════ */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -1080,6 +1187,18 @@
         <input class="f-input" id="c-tags" type="text" placeholder="design, backend, ux  (comma-separated)">
       </div>
       <div class="f-group">
+        <span class="f-label">Checklist</span>
+        <div class="modal-checklist-progress" id="checklist-progress" style="display:none">
+          <div class="modal-checklist-progress-bar"><div class="modal-checklist-progress-fill" id="checklist-progress-fill" style="width:0%"></div></div>
+          <span class="modal-checklist-progress-label" id="checklist-progress-label">0/0</span>
+        </div>
+        <div class="link-add-row">
+          <input class="f-input" id="c-checklist-input" type="text" placeholder="Add a subtask, press Enter…">
+          <button class="link-add-btn" id="checklist-add-btn" type="button">Add</button>
+        </div>
+        <div class="modal-checklist-list" id="modal-checklist-list"></div>
+      </div>
+      <div class="f-group">
         <span class="f-label">Links</span>
         <div class="link-add-row">
           <input class="f-input" id="c-link-url" type="text" placeholder="Paste a URL — Discord, GitHub, Figma…">
@@ -1358,6 +1477,7 @@ let drag      = { cardId: null };
 let cardModal = { mode:'add', boardId:null, colId:null, cardId:null };
 let nameModal  = { resolve: null };
 let modalLinks = [];
+let modalChecklist = [];
 
 // ════════════════════════════════════════════════════════════
 // HELPERS
@@ -1492,6 +1612,63 @@ function addModalLink() {
 function removeModalLink(idx) {
   modalLinks.splice(idx, 1);
   renderModalLinks();
+}
+
+function renderModalChecklist() {
+  const container = document.getElementById('modal-checklist-list');
+  const progress  = document.getElementById('checklist-progress');
+  if (!container) return;
+
+  container.innerHTML = modalChecklist.map((item, i) => `
+    <div class="modal-checklist-item ${item.done ? 'done' : ''}">
+      <button class="chk-box ${item.done ? 'checked' : ''}" onclick="toggleModalChecklistItem(${i})" title="Mark done">
+        <svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <input class="modal-checklist-text" type="text" value="${esc(item.text)}"
+             onchange="updateModalChecklistText(${i}, this.value)"
+             onkeydown="if(event.key==='Enter')this.blur()">
+      <button class="modal-checklist-del" onclick="removeModalChecklistItem(${i})" title="Remove">
+        <svg viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+    </div>`).join('');
+
+  const total = modalChecklist.length;
+  const done  = modalChecklist.filter(i => i.done).length;
+  if (progress) {
+    progress.style.display = total ? 'flex' : 'none';
+    document.getElementById('checklist-progress-fill').style.width  = (total ? done / total * 100 : 0) + '%';
+    document.getElementById('checklist-progress-label').textContent = `${done}/${total}`;
+  }
+}
+
+function addModalChecklistItem() {
+  const input = document.getElementById('c-checklist-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  modalChecklist.push({ id: uid(), text, done: false });
+  input.value = '';
+  renderModalChecklist();
+  input.focus();
+}
+
+function toggleModalChecklistItem(idx) {
+  const item = modalChecklist[idx];
+  if (!item) return;
+  item.done = !item.done;
+  renderModalChecklist();
+}
+
+function updateModalChecklistText(idx, value) {
+  const item = modalChecklist[idx];
+  if (!item) return;
+  const text = value.trim();
+  if (!text) { removeModalChecklistItem(idx); return; }
+  item.text = text;
+}
+
+function removeModalChecklistItem(idx) {
+  modalChecklist.splice(idx, 1);
+  renderModalChecklist();
 }
 
 function openURL(url) {
@@ -1652,6 +1829,39 @@ function renderColumn(board, col) {
     </div>`;
 }
 
+function checklistHtml(card) {
+  const items = card.checklist || [];
+  if (!items.length) return '';
+  const CAP   = 4;
+  const shown = items.slice(0, CAP);
+  const extra = items.length - shown.length;
+
+  const rows = shown.map(item => `
+    <button class="card-checklist-item ${item.done ? 'done' : ''}"
+            onclick="event.stopPropagation();toggleCardChecklistItem('${card.id}','${item.id}')"
+            title="${item.done ? 'Mark as not done' : 'Mark as done'}">
+      <span class="card-chk-box">
+        <svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="card-checklist-item-text">${esc(item.text)}</span>
+    </button>`).join('');
+
+  const more = extra > 0
+    ? `<button class="card-checklist-more" onclick="event.stopPropagation();openEditCard('${card.id}')">+${extra} more</button>`
+    : '';
+
+  return `<div class="card-checklist">${rows}${more}</div>`;
+}
+
+function toggleCardChecklistItem(cardId, itemId) {
+  const board = activeBoard();
+  const card  = board?.cards.find(c => c.id === cardId);
+  const item  = card?.checklist?.find(i => i.id === itemId);
+  if (!item) return;
+  item.done = !item.done;
+  render();
+}
+
 function renderCard(card) {
   const tagsHtml = (card.tags || []).length
     ? `<div class="card-tags">${card.tags.map(t => `<span class="tag" style="${tagStyle(t)}">${esc(t)}</span>`).join('')}</div>`
@@ -1674,6 +1884,7 @@ function renderCard(card) {
       </div>
       <div class="card-title">${esc(card.title)}</div>
       ${card.desc ? `<div class="card-desc">${esc(card.desc)}</div>` : ''}
+      ${checklistHtml(card)}
       ${etaHtml(card)}
       ${tagsHtml}
       ${renderCardLinks(card.links)}
@@ -1771,6 +1982,8 @@ function openAddCard(boardId, colId) {
   document.getElementById('c-title').classList.remove('err');
   modalLinks = [];
   renderModalLinks();
+  modalChecklist = [];
+  renderModalChecklist();
   openOverlay('card-overlay');
   setTimeout(() => document.getElementById('c-title').focus(), 60);
 }
@@ -1791,6 +2004,8 @@ function openEditCard(cardId) {
   document.getElementById('c-title').classList.remove('err');
   modalLinks = (card.links || []).map(l => ({ ...l }));
   renderModalLinks();
+  modalChecklist = (card.checklist || []).map(i => ({ ...i }));
+  renderModalChecklist();
   openOverlay('card-overlay');
   setTimeout(() => document.getElementById('c-title').focus(), 60);
 }
@@ -1804,19 +2019,20 @@ function saveCard() {
   }
   document.getElementById('c-title').classList.remove('err');
 
-  const desc     = document.getElementById('c-desc').value.trim();
-  const tags     = document.getElementById('c-tags').value.split(',').map(t => t.trim()).filter(Boolean);
-  const links    = modalLinks.slice();
-  const deadline = document.getElementById('c-deadline').value || null;
-  const priority = document.querySelector('input[name="p"]:checked')?.value || 'medium';
-  const board    = S.boards.find(b => b.id === cardModal.boardId);
+  const desc      = document.getElementById('c-desc').value.trim();
+  const tags      = document.getElementById('c-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const links     = modalLinks.slice();
+  const checklist = modalChecklist.slice();
+  const deadline  = document.getElementById('c-deadline').value || null;
+  const priority  = document.querySelector('input[name="p"]:checked')?.value || 'medium';
+  const board     = S.boards.find(b => b.id === cardModal.boardId);
   if (!board) return;
 
   if (cardModal.mode === 'add') {
-    board.cards.push({ id: uid(), col: cardModal.colId, title, desc, priority, tags, links, deadline });
+    board.cards.push({ id: uid(), col: cardModal.colId, title, desc, priority, tags, links, deadline, checklist });
   } else {
     const card = board.cards.find(c => c.id === cardModal.cardId);
-    if (card) Object.assign(card, { title, desc, priority, tags, links, deadline });
+    if (card) Object.assign(card, { title, desc, priority, tags, links, deadline, checklist });
   }
 
   closeOverlay('card-overlay');
@@ -2000,6 +2216,10 @@ document.getElementById('link-add-btn').onclick = addModalLink;
 document.getElementById('c-deadline-clear').onclick = () => { document.getElementById('c-deadline').value = ''; };
 document.getElementById('c-link-url').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addModalLink(); }
+});
+document.getElementById('checklist-add-btn').onclick = addModalChecklistItem;
+document.getElementById('c-checklist-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addModalChecklistItem(); }
 });
 document.getElementById('card-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeOverlay('card-overlay');
